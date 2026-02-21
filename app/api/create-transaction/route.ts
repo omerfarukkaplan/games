@@ -20,7 +20,7 @@ export async function POST() {
       body: JSON.stringify({
         items: [
           {
-            price_id: "pri_01kj10pm3304a7oq4t0hs1f0r0", // kendi price id
+            price_id: "pri_01kj10pm3304a70q4t0hs1f0r0", // kendi price id
             quantity: 1,
           },
         ],
