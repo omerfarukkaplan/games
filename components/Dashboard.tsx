@@ -46,7 +46,7 @@ export default function Dashboard() {
       </motion.div>
 
       {/* 🔥 BUY COINS BURADA */}
-      <BuyCoins userId={profile.id} />
+      <BuyCoins />
 
       {/* GAME */}
       <div className="mt-10">
