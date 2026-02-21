@@ -33,11 +33,6 @@ export default function BuyCoins() {
     if (!ready) return;
 
     window.Paddle.Checkout.open({
-      settings: {
-        displayMode: "overlay",
-        theme: "dark",
-      },
-
       items: [
         {
           priceId: "pri_01kj10pm3304a7oq4t0hs1f0r0",
@@ -47,6 +42,16 @@ export default function BuyCoins() {
 
       customer: {
         email: "test@example.com",
+      },
+
+      customData: {
+        userId: "test-user",
+      },
+
+      settings: {
+        displayMode: "overlay",
+        theme: "dark",
+        successUrl: "https://followops.app",
       },
     });
   };
