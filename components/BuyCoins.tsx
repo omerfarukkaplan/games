@@ -29,30 +29,20 @@ export default function BuyCoins() {
     document.body.appendChild(script);
   }, []);
 
-  const openCheckout = () => {
-    if (!ready) return;
+  const openCheckout = async () => {
+    const res = await fetch("/api/create-transaction", {
+      method: "POST",
+    });
+
+    const data = await res.json();
+
+    if (!data?.data?.id) {
+      alert("Transaction oluşturulamadı");
+      return;
+    }
 
     window.Paddle.Checkout.open({
-      items: [
-        {
-          priceId: "pri_01kj10pm3304a7oq4t0hs1f0r0",
-          quantity: 1,
-        },
-      ],
-
-      customer: {
-        email: "test@example.com",
-      },
-
-      customData: {
-        userId: "test-user",
-      },
-
-      settings: {
-        displayMode: "overlay",
-        theme: "dark",
-        successUrl: "https://followops.app",
-      },
+      transactionId: data.data.id,
     });
   };
 
