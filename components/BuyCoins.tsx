@@ -29,22 +29,19 @@ export default function BuyCoins() {
     document.body.appendChild(script);
   }, []);
 
-  const openCheckout = async () => {
-    const res = await fetch("/api/create-transaction", {
-      method: "POST",
-    });
+ const openCheckout = async () => {
+  const res = await fetch("/api/create-transaction", { method: "POST" });
+  const data = await res.json();
 
-    const data = await res.json();
+  if (!res.ok) {
+    alert(JSON.stringify(data, null, 2));
+    return;
+  }
 
-    if (!data?.data?.id) {
-      alert("Transaction oluşturulamadı");
-      return;
-    }
-
-    window.Paddle.Checkout.open({
-      transactionId: data.data.id,
-    });
-  };
+  window.Paddle.Checkout.open({
+    transactionId: data.data.id,
+  });
+};
 
   return (
     <div className="premium-card p-6 rounded-xl text-center mt-6">
