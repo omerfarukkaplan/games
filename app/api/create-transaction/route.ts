@@ -1,55 +1,58 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST() {
-  const apiKey = process.env.PADDLE_API_KEY;
-
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "Missing PADDLE_API_KEY" },
-      { status: 500 }
-    );
-  }
-
+export async function POST(req: NextRequest) {
   try {
-    const res = await fetch("https://sandbox-api.paddle.com/transactions", {
+    const { userId } = await req.json();
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Missing userId" },
+        { status: 400 }
+      );
+    }
+
+    const PADDLE_API_KEY = process.env.PADDLE_API_KEY;
+    const PRICE_ID = "pri_01kj10pm3304a70q4t0hs1f0r0"; // ⚠️ BURAYA GERÇEK pri_ ID
+
+    const response = await fetch("https://sandbox-api.paddle.com/transactions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${PADDLE_API_KEY}`,
       },
       body: JSON.stringify({
         items: [
           {
-            price_id: "pri_01kj10pm3304a70q4t0hs1f0r0", // kendi price id
+            price_id: PRICE_ID,
             quantity: 1,
           },
         ],
-        customer: {
-          email: "test@test.com",
+        custom_data: {
+          user_id: userId, // 🔥 webhook için kritik
         },
       }),
     });
 
-    const text = await res.text(); // ham cevabı al
-    let data: any;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = { raw: text };
-    }
+    const data = await response.json();
 
-    if (!res.ok) {
-      // HATA MESAJINI FRONTEND’E AYNEN DÖN
+    if (!response.ok) {
       return NextResponse.json(
-        { paddle_status: res.status, paddle_error: data },
-        { status: res.status }
+        {
+          paddle_status: response.status,
+          paddle_error: data,
+        },
+        { status: 400 }
       );
     }
 
-    return NextResponse.json(data);
-  } catch (e: any) {
+    return NextResponse.json({
+      checkout_url: data.data.checkout.url,
+    });
+
+  } catch (error) {
+    console.error("Create transaction error:", error);
     return NextResponse.json(
-      { error: e?.message || "Transaction failed" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
