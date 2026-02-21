@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import crypto from "crypto"
 import { createClient } from "@supabase/supabase-js"
 
 const supabase = createClient(
@@ -6,25 +7,41 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export async function POST(req: NextRequest) {
-  const body = await req.json()
+function verifySignature(rawBody: string, signature: string) {
+  const secret = process.env.PADDLE_WEBHOOK_SECRET!
+  const hash = crypto
+    .createHmac("sha256", secret)
+    .update(rawBody)
+    .digest("hex")
 
-  // Paddle event kontrolü
+  return hash === signature
+}
+
+export async function POST(req: NextRequest) {
+  const rawBody = await req.text()
+  const signature = req.headers.get("paddle-signature")
+
+  if (!signature || !verifySignature(rawBody, signature)) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
+  }
+
+  const body = JSON.parse(rawBody)
+
   if (body.event_type !== "transaction.completed") {
     return NextResponse.json({ ok: true })
   }
 
   const userId = body.data.custom_data.user_id
-  const coinsPurchased = parseInt(body.data.custom_data.coins)
+  const coins = parseInt(body.data.custom_data.coins)
 
-  if (!userId || !coinsPurchased) {
+  if (!userId || !coins) {
     return NextResponse.json({ error: "Invalid data" }, { status: 400 })
   }
 
   await supabase
     .from("profiles")
     .update({
-      coins: supabase.rpc("increment_coins", { amount: coinsPurchased })
+      coins: supabase.rpc("increment_coins", { amount: coins })
     })
     .eq("id", userId)
 
