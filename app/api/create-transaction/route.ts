@@ -5,7 +5,7 @@ export async function POST() {
 
   if (!apiKey) {
     return NextResponse.json(
-      { error: "PADDLE_API_KEY missing" },
+      { error: "Missing API key" },
       { status: 500 }
     );
   }
@@ -22,11 +22,13 @@ export async function POST() {
         body: JSON.stringify({
           items: [
             {
-              price_id: "pri_01kj10pm3304a7oq4t0hs1f0r0", // kendi price id'in
+              price_id: "pri_01kj10pm3304a7oq4t0hs1f0r0",
               quantity: 1,
             },
           ],
-          customer_email: "test@test.com",
+          customer: {
+            email: "test@test.com",
+          },
         }),
       }
     );
@@ -35,7 +37,7 @@ export async function POST() {
 
     if (!response.ok) {
       return NextResponse.json(
-        { error: data },
+        { paddle_error: data },
         { status: response.status }
       );
     }
@@ -43,7 +45,7 @@ export async function POST() {
     return NextResponse.json(data);
   } catch (error) {
     return NextResponse.json(
-      { error: "Transaction creation failed" },
+      { error: "Transaction failed" },
       { status: 500 }
     );
   }
