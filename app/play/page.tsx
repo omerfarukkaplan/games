@@ -1,25 +1,11 @@
-import LastMessageGame from "@/components/LastMessageGame";
-import RedFlagGame from "@/components/RedFlagGame";
-import LieDetectorGame from "@/components/LieDetectorGame";
-import GaslightGame from "@/components/GaslightGame";
-import NarcissistGame from "@/components/NarcissistGame";
+"use client";
 
-export const dynamic = "force-dynamic";
+import GameSelector from "@/components/GameSelector";
 
-type Props = {
-  searchParams: { game?: string };
-};
-
-export default function PlayPage({ searchParams }: Props) {
-  const game = searchParams?.game || "lastmessage";
-
+export default function PlayPage() {
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-      {game === "lastmessage" && <LastMessageGame />}
-      {game === "redflag" && <RedFlagGame />}
-      {game === "liedetector" && <LieDetectorGame />}
-      {game === "gaslight" && <GaslightGame />}
-      {game === "narcissist" && <NarcissistGame />}
+    <main className="p-10">
+      <GameSelector />
     </main>
   );
 }

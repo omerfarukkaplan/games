@@ -4,8 +4,8 @@ export async function POST() {
   const res = await fetch("https://api.paddle.com/transactions", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${process.env.PADDLE_API_KEY}`,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       items: [
@@ -20,7 +20,7 @@ export async function POST() {
   const data = await res.json();
 
   if (!res.ok) {
-    return NextResponse.json({ error: data }, { status: 500 });
+    return NextResponse.json(data, { status: 500 });
   }
 
   return NextResponse.json({
