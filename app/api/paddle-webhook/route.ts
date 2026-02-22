@@ -1,24 +1,23 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { supabaseServer } from "@/lib/supabase-server";
 
 export async function POST(req: Request) {
   const body = await req.json();
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-
-  if (body.event_type === "transaction.completed") {
-    const userId = body.data.custom_data.user_id;
-    const tier = body.data.custom_data.tier;
-
-    await supabase.from("pack_purchases").insert({
-      user_id: userId,
-      pack_name: "dark_psychology",
-      tier: tier,
-    });
+  if (body.event_type !== "transaction.completed") {
+    return NextResponse.json({ ok: true });
   }
+
+  const userId = body.data.custom_data?.user_id;
+
+  if (!userId) {
+    return NextResponse.json({ error: "no user id" }, { status: 400 });
+  }
+
+  await supabaseServer.rpc("increment_user_coins", {
+    user_id: userId,
+    amount: 1000,
+  });
 
   return NextResponse.json({ success: true });
 }
